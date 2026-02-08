@@ -109,7 +109,7 @@ Settings are saved in `config.json` next to the executable (or in the project ro
 
 ## License
 
-MIT License - see [LICENSE](LICENSE)
+GPL-3.0 License - see [LICENSE](LICENSE)
 
 ## Author
 

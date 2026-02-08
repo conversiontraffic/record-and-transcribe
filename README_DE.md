@@ -109,7 +109,7 @@ Einstellungen werden in `config.json` neben der .exe gespeichert (oder im Projek
 
 ## Lizenz
 
-MIT License - siehe [LICENSE](LICENSE)
+GPL-3.0 License - siehe [LICENSE](LICENSE)
 
 ## Autor
 
