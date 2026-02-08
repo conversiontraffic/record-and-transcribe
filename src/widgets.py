@@ -1,6 +1,9 @@
 """Custom rounded widgets for a modern UI look."""
 
+import sys
 import tkinter as tk
+
+_DEFAULT_FONT = 'Helvetica Neue' if sys.platform == 'darwin' else 'Segoe UI'
 
 
 class RoundedButton(tk.Canvas):
@@ -19,7 +22,7 @@ class RoundedButton(tk.Canvas):
         self._hover_color = hover_color
         self._corner_radius = corner_radius
         self._height = height
-        self._font = font or ('Segoe UI', 10)
+        self._font = font or (_DEFAULT_FONT, 10)
         self._state = 'normal'
         self._pressed = False
 

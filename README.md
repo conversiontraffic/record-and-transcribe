@@ -10,13 +10,13 @@
 
 ## Features
 
-- Record **microphone** and/or **system audio** (WASAPI Loopback)
+- Record **microphone** and/or **system audio** (WASAPI Loopback / BlackHole)
 - **Live audio level meters** for both sources
 - Automatic **MP3 conversion** after recording
 - Built-in **transcription** using OpenAI Whisper (runs locally, no API key needed)
 - **Transcribe existing files** (MP3, WAV, MP4, MKV, AVI, M4A, WebM)
 - **Bilingual UI** - English and German
-- Portable **single-file .exe** (Windows)
+- **Cross-platform** - Windows (.exe) and macOS (from source)
 - All processing happens **locally** - no data leaves your machine
 
 ## Download
@@ -25,17 +25,21 @@ Go to [Releases](../../releases) and download the latest `record-and-transcribe-
 
 ## System Requirements
 
-- **OS:** Windows 10/11
-- **Python:** 3.9+ (only for running from source)
-- **FFmpeg:** Bundled in the .exe release, or install separately for development
+- **OS:** Windows 10/11 or macOS 12+
+- **Python:** 3.10+ (only for running from source)
+- **FFmpeg:** Bundled in the .exe release, or install separately for development / macOS
 
 ### System Audio Recording
 
-To record system audio (e.g., meeting audio from Zoom/Teams), you need one of:
-
+**Windows:**
 - **Stereo Mix** - Enable in Windows Sound Settings > Recording Devices
 - **VB-Audio Virtual Cable** (free) - [Download here](https://vb-audio.com/Cable/)
 - **WASAPI Loopback device** - Some audio drivers expose this automatically
+
+**macOS:**
+- **BlackHole** (free, recommended) - `brew install blackhole-2ch`
+- **Soundflower** (free) - [Download here](https://github.com/mattingalls/Soundflower)
+- **Loopback** (paid) by Rogue Amoeba
 
 ## Quick Start
 
@@ -54,7 +58,21 @@ To record system audio (e.g., meeting audio from Zoom/Teams), you need one of:
 
 > **Windows SmartScreen:** On first launch, Windows may show "Windows protected your PC". Click **"More info"** then **"Run anyway"**. This happens because the app is not code-signed (it's open source and free).
 
-### Option 3: Run from Source
+### Option 3: macOS
+
+```bash
+git clone https://github.com/conversiontraffic/record-and-transcribe.git
+cd record-and-transcribe
+
+# One-command setup & launch (creates venv, installs deps)
+chmod +x start-mac.sh
+./start-mac.sh
+```
+
+Prerequisites: Python 3.10+ and FFmpeg (`brew install python ffmpeg`).
+Optional for system audio: `brew install blackhole-2ch`
+
+### Option 4: Run from Source (any OS)
 
 ```bash
 git clone https://github.com/conversiontraffic/record-and-transcribe.git

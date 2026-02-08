@@ -288,7 +288,14 @@ class Transcriber:
             elif on_status:
                 on_status('loading_model')
             try:
-                self.model = whisper.load_model(self.model_name)
+                import torch
+                if torch.cuda.is_available():
+                    device = "cuda"
+                elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+                    device = "mps"
+                else:
+                    device = "cpu"
+                self.model = whisper.load_model(self.model_name, device=device)
             except Exception as e:
                 raise RuntimeError(
                     f"Failed to load Whisper model '{self.model_name}': {e}"

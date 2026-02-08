@@ -1,8 +1,10 @@
 """
 Audio capture module for Record & Transcribe.
-Handles microphone and system audio (WASAPI Loopback) recording.
+Handles microphone and system audio (WASAPI Loopback on Windows,
+BlackHole/Soundflower/Loopback on macOS) recording.
 """
 
+import sys
 import sounddevice as sd
 import numpy as np
 import wave
@@ -56,9 +58,15 @@ class AudioCapture:
 
     @staticmethod
     def get_loopback_devices():
-        """Get WASAPI loopback devices for system audio capture."""
+        """Get loopback devices for system audio capture.
+
+        Windows: WASAPI Loopback, Stereo Mix, VB-Audio Virtual Cable.
+        macOS: BlackHole, Soundflower, Loopback (Rogue Amoeba).
+        """
         devices = sd.query_devices()
         loopback_devices = []
+
+        # Windows: WASAPI loopback and Stereo Mix
         for i, device in enumerate(devices):
             name_lower = device['name'].lower()
             if 'loopback' in name_lower or 'stereo mix' in name_lower:
@@ -68,6 +76,7 @@ class AudioCapture:
                     'channels': device['max_input_channels']
                 })
 
+        # Windows: speaker/headphone devices with input capability
         for i, device in enumerate(devices):
             if device['max_output_channels'] > 0 and device['max_input_channels'] > 0:
                 if not any(d['index'] == i for d in loopback_devices):
@@ -77,6 +86,20 @@ class AudioCapture:
                             'name': f"{device['name']} (Loopback)",
                             'channels': min(device['max_input_channels'], 2)
                         })
+
+        # macOS: virtual audio devices (BlackHole, Soundflower, Loopback)
+        if sys.platform == 'darwin':
+            mac_virtual_keywords = ['blackhole', 'soundflower', 'loopback']
+            for i, device in enumerate(devices):
+                name_lower = device['name'].lower()
+                if any(kw in name_lower for kw in mac_virtual_keywords):
+                    if device['max_input_channels'] > 0:
+                        if not any(d['index'] == i for d in loopback_devices):
+                            loopback_devices.append({
+                                'index': i,
+                                'name': device['name'],
+                                'channels': min(device['max_input_channels'], 2)
+                            })
 
         return loopback_devices
 

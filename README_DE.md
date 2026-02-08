@@ -10,13 +10,13 @@
 
 ## Features
 
-- **Mikrofon** und/oder **System-Audio** (WASAPI Loopback) aufnehmen
+- **Mikrofon** und/oder **System-Audio** (WASAPI Loopback / BlackHole) aufnehmen
 - **Live Audio-Pegelanzeige** fuer beide Quellen
 - Automatische **MP3-Konvertierung** nach Aufnahme
 - Integrierte **Transkription** mit OpenAI Whisper (laeuft lokal, kein API-Key noetig)
 - **Bestehende Dateien transkribieren** (MP3, WAV, MP4, MKV, AVI, M4A, WebM)
 - **Zweisprachige Oberflaeche** - Deutsch und Englisch
-- Portable **Single-File .exe** (Windows)
+- **Plattformuebergreifend** - Windows (.exe) und macOS (aus Quellcode)
 - Alles laeuft **lokal** - keine Daten verlassen deinen Rechner
 
 ## Download
@@ -25,17 +25,23 @@ Gehe zu [Releases](../../releases) und lade die neueste `record-and-transcribe-v
 
 ## Systemvoraussetzungen
 
-- **OS:** Windows 10/11
-- **Python:** 3.9+ (nur fuer Ausfuehrung aus dem Quellcode)
-- **FFmpeg:** In der .exe enthalten, oder separat installieren fuer Entwicklung
+- **OS:** Windows 10/11 oder macOS 12+
+- **Python:** 3.10+ (nur fuer Ausfuehrung aus dem Quellcode)
+- **FFmpeg:** In der .exe enthalten, oder separat installieren fuer Entwicklung / macOS
 
 ### System-Audio aufnehmen
 
 Um System-Audio aufzunehmen (z.B. Meeting-Audio von Zoom/Teams), brauchst du eines davon:
 
+**Windows:**
 - **Stereo Mix** - Aktivieren unter Windows Soundeinstellungen > Aufnahmegeraete
 - **VB-Audio Virtual Cable** (kostenlos) - [Download hier](https://vb-audio.com/Cable/)
 - **WASAPI Loopback** - Manche Audio-Treiber stellen das automatisch bereit
+
+**macOS:**
+- **BlackHole** (kostenlos, empfohlen) - `brew install blackhole-2ch`
+- **Soundflower** (kostenlos) - [Download hier](https://github.com/mattingalls/Soundflower)
+- **Loopback** (kostenpflichtig) von Rogue Amoeba
 
 ## Schnellstart
 
@@ -54,7 +60,21 @@ Um System-Audio aufzunehmen (z.B. Meeting-Audio von Zoom/Teams), brauchst du ein
 
 > **Windows SmartScreen:** Beim ersten Start zeigt Windows evtl. "Der Computer wurde geschuetzt". Auf **"Weitere Informationen"** und dann **"Trotzdem ausfuehren"** klicken. Das passiert, weil die App nicht Code-signiert ist (sie ist Open Source und kostenlos).
 
-### Option 3: Aus dem Quellcode starten
+### Option 3: macOS
+
+```bash
+git clone https://github.com/conversiontraffic/record-and-transcribe.git
+cd record-and-transcribe
+
+# Ein-Befehl-Setup & Start (erstellt venv, installiert Abhaengigkeiten)
+chmod +x start-mac.sh
+./start-mac.sh
+```
+
+Voraussetzungen: Python 3.10+ und FFmpeg (`brew install python ffmpeg`).
+Optional fuer System-Audio: `brew install blackhole-2ch`
+
+### Option 4: Aus dem Quellcode starten (alle OS)
 
 ```bash
 git clone https://github.com/conversiontraffic/record-and-transcribe.git

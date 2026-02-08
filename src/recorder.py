@@ -65,6 +65,9 @@ CONFIG_FILE = get_config_dir() / 'config.json'
 DEFAULT_OUTPUT_DIR = Path.home() / 'Documents' / 'Record & Transcribe'
 LOGO_PATH = get_resource_path('assets' / Path('logo.png'))
 
+# Platform-aware font
+SYSTEM_FONT = 'Helvetica Neue' if sys.platform == 'darwin' else 'Segoe UI'
+
 # Branding
 APP_NAME = "Record & Transcribe"
 APP_VERSION = "0.1.4"
@@ -177,8 +180,9 @@ class RecordAndTranscribeApp:
         # Cleanup on window close
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
-        # Check for updates (non-blocking)
-        self._check_for_updates()
+        # Check for updates (non-blocking, Windows only - uses GitHub releases with .exe)
+        if sys.platform == 'win32':
+            self._check_for_updates()
 
     def _on_close(self):
         """Clean up all resources when window is closed."""
@@ -200,9 +204,14 @@ class RecordAndTranscribeApp:
 
     @staticmethod
     def _open_in_explorer(file_path):
-        """Open the containing folder in Explorer and select the file."""
+        """Open the containing folder in the file manager and select the file."""
         try:
-            subprocess.Popen(['explorer', '/select,', str(Path(file_path))])
+            if sys.platform == 'darwin':
+                subprocess.Popen(['open', '-R', str(Path(file_path))])
+            elif sys.platform == 'win32':
+                subprocess.Popen(['explorer', '/select,', str(Path(file_path))])
+            else:
+                subprocess.Popen(['xdg-open', str(Path(file_path).parent)])
         except Exception:
             pass
 
@@ -245,17 +254,23 @@ class RecordAndTranscribeApp:
         # Help menu with system check
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=t('menu.help'), menu=help_menu)
-        help_menu.add_command(label=t('menu.check_updates'), command=self._manual_update_check)
-        help_menu.add_separator()
+        if sys.platform == 'win32':
+            help_menu.add_command(label=t('menu.check_updates'), command=self._manual_update_check)
+            help_menu.add_separator()
         help_menu.add_command(label=t('menu.system_check'), command=self._show_system_check)
-        help_menu.add_command(label=t('menu.install_gpu'), command=self._install_gpu_support)
+        if sys.platform == 'win32':
+            help_menu.add_command(label=t('menu.install_gpu'), command=self._install_gpu_support)
         help_menu.add_command(label=t('menu.about'), command=self._show_about)
 
-    def _check_cuda_available(self):
-        """Check if CUDA GPU is available via PyTorch."""
+    def _check_gpu_available(self):
+        """Check if GPU acceleration is available via PyTorch (CUDA or MPS)."""
         try:
             import torch
-            return torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
+            if torch.cuda.is_available():
+                return True, torch.cuda.get_device_name(0)
+            if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+                return True, 'Apple Silicon (MPS)'
+            return False, None
         except Exception:
             return False, None
 
@@ -282,8 +297,8 @@ class RecordAndTranscribeApp:
         loopback_ok = len(AudioCapture.get_loopback_devices()) > 0
         checks.append((t('syscheck.loopback'), loopback_ok, t('syscheck.loopback_desc')))
 
-        # GPU/CUDA
-        cuda_ok, gpu_name = self._check_cuda_available()
+        # GPU (CUDA / MPS)
+        cuda_ok, gpu_name = self._check_gpu_available()
         if cuda_ok and gpu_name:
             checks.append((f'{t("syscheck.gpu")} ({gpu_name})', True, ''))
         elif hasattr(sys, '_MEIPASS'):
@@ -310,7 +325,7 @@ class RecordAndTranscribeApp:
     def _install_gpu_support(self):
         """Install CUDA PyTorch for GPU-accelerated transcription."""
         # Check if already available
-        cuda_ok, gpu_name = self._check_cuda_available()
+        cuda_ok, gpu_name = self._check_gpu_available()
         if cuda_ok:
             messagebox.showinfo(
                 t('menu.install_gpu'),
@@ -507,14 +522,14 @@ class RecordAndTranscribeApp:
         title_label = ttk.Label(
             title_container,
             text=APP_NAME,
-            font=('Segoe UI', 14, 'bold')
+            font=(SYSTEM_FONT, 14, 'bold')
         )
         title_label.pack(anchor=tk.W)
 
         subtitle_label = ttk.Label(
             title_container,
             text=APP_SUBTITLE,
-            font=('Segoe UI', 9),
+            font=(SYSTEM_FONT, 9),
             foreground='gray'
         )
         subtitle_label.pack(anchor=tk.W)
@@ -594,7 +609,7 @@ class RecordAndTranscribeApp:
             fg_color='#e0e0e0',
             corner_radius=12,
             height=34,
-            font=('Segoe UI', 9)
+            font=(SYSTEM_FONT, 9)
         )
         refresh_btn.pack(fill=tk.X, pady=(10, 0))
         self._rounded_buttons = [refresh_btn]
@@ -604,7 +619,7 @@ class RecordAndTranscribeApp:
         self.status_label = ttk.Label(
             main_frame,
             textvariable=self.status_var,
-            font=('Segoe UI', 11)
+            font=(SYSTEM_FONT, 11)
         )
         self.status_label.pack(pady=(5, 10))
 
@@ -617,7 +632,7 @@ class RecordAndTranscribeApp:
             fg_color='#ffffff',
             corner_radius=20,
             height=48,
-            font=('Segoe UI', 12, 'bold')
+            font=(SYSTEM_FONT, 12, 'bold')
         )
         self.record_btn.pack(fill=tk.X, pady=10)
         self._rounded_buttons.append(self.record_btn)
@@ -627,7 +642,7 @@ class RecordAndTranscribeApp:
         self.duration_label = ttk.Label(
             main_frame,
             textvariable=self.duration_var,
-            font=('Segoe UI', 10)
+            font=(SYSTEM_FONT, 10)
         )
         self.duration_label.pack(pady=(5, 15))
 
@@ -656,7 +671,7 @@ class RecordAndTranscribeApp:
             corner_radius=10,
             height=30,
             width=40,
-            font=('Segoe UI', 10)
+            font=(SYSTEM_FONT, 10)
         )
         browse_btn.pack(side=tk.LEFT, padx=(5, 0))
         self._rounded_buttons.append(browse_btn)
@@ -699,7 +714,7 @@ class RecordAndTranscribeApp:
         model_label = ttk.Label(
             trans_inner,
             text=t('transcription.model', model=self.transcriber.model_name),
-            font=('Segoe UI', 8),
+            font=(SYSTEM_FONT, 8),
             foreground='gray'
         )
         model_label.pack(anchor=tk.W, pady=(8, 0))
@@ -710,7 +725,7 @@ class RecordAndTranscribeApp:
         self.trans_progress_label = ttk.Label(
             self.trans_progress_frame,
             text=t('transcription.progress', percent=0),
-            font=('Segoe UI', 9)
+            font=(SYSTEM_FONT, 9)
         )
         self.trans_progress_label.pack(anchor=tk.W)
 
@@ -732,7 +747,7 @@ class RecordAndTranscribeApp:
             fg_color='#ffffff',
             corner_radius=12,
             height=34,
-            font=('Segoe UI', 9)
+            font=(SYSTEM_FONT, 9)
         )
         self.cancel_trans_btn.pack(fill=tk.X)
         self._rounded_buttons.append(self.cancel_trans_btn)
@@ -753,7 +768,7 @@ class RecordAndTranscribeApp:
                 text=t('transcription.model_first_download'),
                 foreground='orange',
                 wraplength=360,
-                font=('Segoe UI', 8)
+                font=(SYSTEM_FONT, 8)
             )
             info_label.pack(anchor=tk.W, pady=(5, 0))
 
