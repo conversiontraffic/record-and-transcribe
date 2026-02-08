@@ -18,7 +18,7 @@ from pathlib import Path
 
 from i18n import t, set_language, get_language
 from audio_capture import AudioCapture, convert_to_mp3
-from transcriber import Transcriber, check_whisper_installed, check_whisper_model_cached, extract_audio_from_video
+from transcriber import Transcriber, check_whisper_installed, check_whisper_model_cached, extract_audio_from_video, check_system_whisper_gpu
 from widgets import RoundedButton
 from update_checker import check_for_updates, download_update
 
@@ -67,7 +67,7 @@ LOGO_PATH = get_resource_path('assets' / Path('logo.png'))
 
 # Branding
 APP_NAME = "Record & Transcribe"
-APP_VERSION = "0.1.2"
+APP_VERSION = "0.1.3"
 APP_SUBTITLE = "by conversion-traffic.de"
 
 # Brand colors
@@ -287,7 +287,11 @@ class RecordAndTranscribeApp:
         if cuda_ok and gpu_name:
             checks.append((f'{t("syscheck.gpu")} ({gpu_name})', True, ''))
         elif hasattr(sys, '_MEIPASS'):
-            checks.append((t('syscheck.gpu'), False, t('syscheck.gpu_exe_desc')))
+            sys_gpu_available, _ = check_system_whisper_gpu()
+            if sys_gpu_available:
+                checks.append((t('syscheck.gpu'), True, t('syscheck.gpu_system_desc')))
+            else:
+                checks.append((t('syscheck.gpu'), False, t('syscheck.gpu_exe_desc')))
         else:
             checks.append((t('syscheck.gpu'), False, t('syscheck.gpu_desc')))
 
@@ -891,6 +895,7 @@ class RecordAndTranscribeApp:
                         status_map = {
                             'downloading_model': t('status.downloading_model'),
                             'loading_model': t('status.loading_model'),
+                            'transcribing_gpu': t('status.transcribing_gpu'),
                         }
                         msg = status_map.get(status_key)
                         if msg:
@@ -1091,6 +1096,7 @@ class RecordAndTranscribeApp:
                     status_map = {
                         'downloading_model': t('status.downloading_model'),
                         'loading_model': t('status.loading_model'),
+                        'transcribing_gpu': t('status.transcribing_gpu'),
                     }
                     msg = status_map.get(status_key)
                     if msg:

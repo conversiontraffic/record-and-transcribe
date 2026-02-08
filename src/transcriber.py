@@ -6,6 +6,7 @@ Uses Whisper Python API with tqdm wrapper for real progress tracking.
 import os
 import sys
 import threading
+import logging
 from pathlib import Path
 from typing import Callable, Optional
 import subprocess
@@ -71,6 +72,51 @@ class ProgressTqdm(tqdm_module.tqdm):
         super().close()
 
 
+logger = logging.getLogger(__name__)
+
+# Cache for system whisper GPU check result
+_system_whisper_gpu_cache: tuple[bool, str | None] | None = None
+
+
+def check_system_whisper_gpu() -> tuple[bool, str | None]:
+    """
+    Check if system Python has whisper + CUDA GPU available.
+    Only checks when running as .exe (PyInstaller bundle).
+    Results are cached for the lifetime of the process.
+
+    Returns:
+        (available, python_path) - whether system whisper+GPU is available and the python path
+    """
+    global _system_whisper_gpu_cache
+
+    if _system_whisper_gpu_cache is not None:
+        return _system_whisper_gpu_cache
+
+    # Only relevant in .exe mode
+    if not hasattr(sys, '_MEIPASS'):
+        _system_whisper_gpu_cache = (False, None)
+        return _system_whisper_gpu_cache
+
+    for python_cmd in ['python', 'python3']:
+        try:
+            result = subprocess.run(
+                [python_cmd, '-c',
+                 'import whisper, torch; print(torch.cuda.is_available())'],
+                capture_output=True, text=True, timeout=5,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+            )
+            if result.returncode == 0 and 'True' in result.stdout:
+                logger.info(f"System whisper+GPU detected via '{python_cmd}'")
+                _system_whisper_gpu_cache = (True, python_cmd)
+                return _system_whisper_gpu_cache
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            continue
+
+    logger.info("No system whisper+GPU found")
+    _system_whisper_gpu_cache = (False, None)
+    return _system_whisper_gpu_cache
+
+
 class Transcriber:
     """Handles audio transcription using Whisper Python API."""
 
@@ -98,6 +144,85 @@ class Transcriber:
         self.model = None  # Lazy loading
         self.is_transcribing = False
         self._cancelled = False
+        self._process: subprocess.Popen | None = None
+
+    def _transcribe_via_system(
+        self,
+        audio_path: Path,
+        language: str | None,
+        output_format: str,
+        output_dir: Path | None,
+        callback: Optional[Callable[[str], None]],
+        on_progress: Optional[Callable[[int], None]],
+        on_status: Optional[Callable[[str], None]]
+    ) -> Path:
+        """
+        Transcribe using system-installed whisper CLI with GPU support.
+        Called when running as .exe and system Python has whisper+CUDA.
+        """
+        _, python_path = check_system_whisper_gpu()
+
+        if output_dir is None:
+            output_dir = audio_path.parent
+        else:
+            output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        if on_status:
+            on_status('transcribing_gpu')
+
+        cmd = [
+            python_path, '-m', 'whisper',
+            str(audio_path),
+            '--model', self.model_name,
+            '--output_format', output_format,
+            '--output_dir', str(output_dir),
+            '--verbose', 'False'
+        ]
+        if language:
+            cmd.extend(['--language', language])
+
+        try:
+            self._process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+            )
+
+            # Wait for completion, checking for cancellation
+            while self._process.poll() is None:
+                if self._cancelled:
+                    self._process.terminate()
+                    try:
+                        self._process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        self._process.kill()
+                    raise RuntimeError("Transcription cancelled")
+                # Brief sleep to avoid busy-waiting
+                import time
+                time.sleep(0.5)
+
+            if self._process.returncode != 0:
+                stderr = self._process.stderr.read() if self._process.stderr else ''
+                raise RuntimeError(f"System whisper failed (exit {self._process.returncode}): {stderr[-500:]}")
+
+            if on_progress:
+                on_progress(100)
+
+            output_path = output_dir / f"{audio_path.stem}.{output_format}"
+            if not output_path.exists():
+                raise RuntimeError(f"Expected output file not found: {output_path}")
+
+            if callback:
+                callback(str(output_path))
+
+            return output_path
+
+        finally:
+            self._process = None
+            self.is_transcribing = False
 
     def transcribe(
         self,
@@ -124,8 +249,6 @@ class Transcriber:
         Returns:
             Path to the transcription file
         """
-        import whisper
-
         audio_path = Path(audio_path)
 
         if not audio_path.exists():
@@ -133,6 +256,17 @@ class Transcriber:
 
         self.is_transcribing = True
         self._cancelled = False
+
+        # In .exe mode, delegate to system whisper if GPU is available
+        if hasattr(sys, '_MEIPASS'):
+            gpu_available, _ = check_system_whisper_gpu()
+            if gpu_available:
+                return self._transcribe_via_system(
+                    audio_path, language, output_format,
+                    output_dir, callback, on_progress, on_status
+                )
+
+        import whisper
 
         # Install tqdm wrapper BEFORE model loading so download progress is captured
         original_tqdm = tqdm_module.tqdm
@@ -237,6 +371,12 @@ class Transcriber:
         """Cancel ongoing transcription."""
         self._cancelled = True
         self.is_transcribing = False
+        # Terminate system whisper subprocess if running
+        if self._process is not None:
+            try:
+                self._process.terminate()
+            except OSError:
+                pass
 
 
 def extract_audio_from_video(video_path: str | Path, output_format: str = 'mp3') -> Path:

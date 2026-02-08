@@ -30,6 +30,7 @@ translations = {
         'syscheck.gpu': 'GPU Acceleration (CUDA)',
         'syscheck.gpu_desc': 'No NVIDIA GPU found - using CPU (slower)',
         'syscheck.gpu_exe_desc': 'Not available in .exe version - run from source for GPU support',
+        'syscheck.gpu_system_desc': 'GPU via system-installed Whisper',
 
         # GPU Installation
         'menu.install_gpu': 'Install GPU Support...',
@@ -58,6 +59,7 @@ translations = {
         'status.extracting_audio': 'Extracting audio...',
         'status.downloading_model': 'Downloading Whisper model (~460 MB)... Please wait.',
         'status.loading_model': 'Loading Whisper model...',
+        'status.transcribing_gpu': 'Transcribing with GPU acceleration...',
         'status.cancelled': 'Cancelled',
 
         # Buttons
@@ -155,6 +157,7 @@ translations = {
         'syscheck.gpu': 'GPU-Beschleunigung (CUDA)',
         'syscheck.gpu_desc': 'Keine NVIDIA-GPU gefunden - CPU wird verwendet (langsamer)',
         'syscheck.gpu_exe_desc': 'In der .exe nicht verf\u00fcgbar - f\u00fcr GPU-Support aus dem Quellcode starten',
+        'syscheck.gpu_system_desc': 'GPU \u00fcber systemweit installiertes Whisper',
 
         # GPU Installation
         'menu.install_gpu': 'GPU-Support installieren...',
@@ -183,6 +186,7 @@ translations = {
         'status.extracting_audio': 'Extrahiere Audio...',
         'status.downloading_model': 'Whisper-Modell wird heruntergeladen (~460 MB)... Bitte warten.',
         'status.loading_model': 'Whisper-Modell wird geladen...',
+        'status.transcribing_gpu': 'Transkribiere mit GPU-Beschleunigung...',
         'status.cancelled': 'Abgebrochen',
 
         # Buttons
