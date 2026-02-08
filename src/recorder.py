@@ -818,7 +818,9 @@ class RecordAndTranscribeApp:
                         }
                         msg = status_map.get(status_key)
                         if msg:
-                            self.root.after(0, lambda m=msg: self.status_var.set(m))
+                            self.root.after(0, lambda m=msg: self._show_indeterminate_progress(m))
+                        if status_key == 'model_ready':
+                            self.root.after(0, self._switch_to_determinate_progress)
 
                     lang_labels = self._get_language_labels()
                     language = lang_labels.get(self.lang_var.get())
@@ -879,12 +881,31 @@ class RecordAndTranscribeApp:
     def _show_transcription_progress(self):
         """Show transcription progress UI."""
         self.is_transcribing = True
+        self.trans_progress_bar.configure(mode='determinate')
         self.trans_progress_bar['value'] = 0
         self.trans_progress_label.config(text=t('transcription.progress', percent=0))
         self.trans_progress_frame.pack(fill=tk.X, pady=(10, 0))
 
+    def _show_indeterminate_progress(self, status_text):
+        """Show animated progress bar for model download/loading."""
+        self.is_transcribing = True
+        self.trans_progress_bar.configure(mode='indeterminate')
+        self.trans_progress_bar.start(15)
+        self.trans_progress_label.config(text=status_text)
+        self.trans_progress_frame.pack(fill=tk.X, pady=(10, 0))
+
+    def _switch_to_determinate_progress(self):
+        """Switch progress bar back to determinate mode after model is ready."""
+        self.trans_progress_bar.stop()
+        self.trans_progress_bar.configure(mode='determinate')
+        self.trans_progress_bar['value'] = 0
+        self.trans_progress_label.config(text=t('transcription.progress', percent=0))
+
     def _update_transcription_progress(self, percent: int):
         """Update transcription progress bar."""
+        if str(self.trans_progress_bar.cget('mode')) == 'indeterminate':
+            self.trans_progress_bar.stop()
+            self.trans_progress_bar.configure(mode='determinate')
         self.trans_progress_bar['value'] = percent
         self.trans_progress_label.config(text=t('transcription.progress', percent=percent))
 
@@ -997,7 +1018,9 @@ class RecordAndTranscribeApp:
                     }
                     msg = status_map.get(status_key)
                     if msg:
-                        self.root.after(0, lambda m=msg: self.status_var.set(m))
+                        self.root.after(0, lambda m=msg: self._show_indeterminate_progress(m))
+                    if status_key == 'model_ready':
+                        self.root.after(0, self._switch_to_determinate_progress)
 
                 lang_labels = self._get_language_labels()
                 language = lang_labels.get(self.lang_var.get())

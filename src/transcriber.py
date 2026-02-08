@@ -3,6 +3,7 @@ Transcriber module for Record & Transcribe.
 Uses Whisper Python API with tqdm wrapper for real progress tracking.
 """
 
+import os
 import sys
 import threading
 from pathlib import Path
@@ -24,8 +25,15 @@ class ProgressTqdm(tqdm_module.tqdm):
     _instance: Optional['ProgressTqdm'] = None
     _poll_thread: Optional[threading.Thread] = None
     _stop_polling: bool = False
+    _devnull: Optional[object] = None
 
     def __init__(self, *args, **kwargs):
+        # pythonw.exe has sys.stderr=None, which crashes tqdm.
+        # Redirect output to devnull since we use callbacks instead.
+        if sys.stderr is None:
+            if ProgressTqdm._devnull is None:
+                ProgressTqdm._devnull = open(os.devnull, 'w')
+            kwargs.setdefault('file', ProgressTqdm._devnull)
         super().__init__(*args, **kwargs)
         ProgressTqdm._instance = self
         ProgressTqdm._stop_polling = False
@@ -123,10 +131,23 @@ class Transcriber:
         if not audio_path.exists():
             raise FileNotFoundError(f"Audio file not found: {audio_path}")
 
-        # Lazy load model
+        self.is_transcribing = True
+        self._cancelled = False
+
+        # Install tqdm wrapper BEFORE model loading so download progress is captured
+        original_tqdm = tqdm_module.tqdm
+        ProgressTqdm._callback = on_progress
+        ProgressTqdm._last_percent = -1
+        tqdm_module.tqdm = ProgressTqdm
+
+        whisper_transcribe_mod = sys.modules.get('whisper.transcribe')
+        original_whisper_tqdm = None
+        if whisper_transcribe_mod and hasattr(whisper_transcribe_mod, 'tqdm'):
+            original_whisper_tqdm = whisper_transcribe_mod.tqdm.tqdm
+            whisper_transcribe_mod.tqdm.tqdm = ProgressTqdm
+
+        # Lazy load model (with tqdm wrapper active for download progress)
         if self.model is None:
-            if on_progress:
-                on_progress(0)
             model_cached = check_whisper_model_cached(self.model_name)
             if not model_cached and on_status:
                 on_status('downloading_model')
@@ -140,21 +161,7 @@ class Transcriber:
                 )
             if on_status:
                 on_status('model_ready')
-
-        self.is_transcribing = True
-        self._cancelled = False
-
-        # Install tqdm wrapper for progress tracking
-        original_tqdm = tqdm_module.tqdm
-        ProgressTqdm._callback = on_progress
-        ProgressTqdm._last_percent = -1
-        tqdm_module.tqdm = ProgressTqdm
-
-        whisper_transcribe_mod = sys.modules.get('whisper.transcribe')
-        original_whisper_tqdm = None
-        if whisper_transcribe_mod and hasattr(whisper_transcribe_mod, 'tqdm'):
-            original_whisper_tqdm = whisper_transcribe_mod.tqdm.tqdm
-            whisper_transcribe_mod.tqdm.tqdm = ProgressTqdm
+            ProgressTqdm._last_percent = -1
 
         try:
             result = self.model.transcribe(
