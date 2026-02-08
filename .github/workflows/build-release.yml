@@ -41,12 +41,6 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Rename portable executable
-        shell: pwsh
-        run: |
-          $version = "${{ steps.version.outputs.version }}"
-          Rename-Item -Path "dist/RecordAndTranscribe.exe" -NewName "record-and-transcribe-${version}-windows.exe"
-
       - name: Update version in installer script
         shell: pwsh
         run: |
@@ -63,10 +57,11 @@ jobs:
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
 
-      - name: Rename installer
+      - name: Rename artifacts
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
+          Rename-Item -Path "dist/RecordAndTranscribe.exe" -NewName "record-and-transcribe-${version}-windows.exe"
           $setupFile = Get-ChildItem -Path "dist" -Filter "record-and-transcribe-setup-*" | Select-Object -First 1
           if ($setupFile) {
             Rename-Item -Path $setupFile.FullName -NewName "record-and-transcribe-setup-${version}-windows.exe"
