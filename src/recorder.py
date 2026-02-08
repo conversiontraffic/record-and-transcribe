@@ -67,7 +67,7 @@ LOGO_PATH = get_resource_path('assets' / Path('logo.png'))
 
 # Branding
 APP_NAME = "Record & Transcribe"
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.1.1"
 APP_SUBTITLE = "by conversion-traffic.de"
 
 # Brand colors
@@ -424,7 +424,7 @@ class RecordAndTranscribeApp:
             'auto_transcribe': True,
             'language': 'Auto',
             'ui_language': 'en',
-            'theme': 'ct-dark'
+            'theme': 'ct-light'
         }
         if CONFIG_FILE.exists():
             try:
@@ -433,9 +433,9 @@ class RecordAndTranscribeApp:
                     default_config.update(saved)
             except Exception:
                 pass
-        # Validate theme - fall back to ct-dark if invalid
+        # Validate theme - fall back to ct-light if invalid
         if default_config.get('theme') not in VALID_THEMES:
-            default_config['theme'] = 'ct-dark'
+            default_config['theme'] = 'ct-light'
         return default_config
 
     def _save_config(self):
@@ -487,9 +487,6 @@ class RecordAndTranscribeApp:
             from PIL import Image, ImageTk
             if LOGO_PATH.exists():
                 img = Image.open(LOGO_PATH)
-                # Crop to icon only (left ~25% is the teardrop symbol)
-                icon_width = int(img.width * 0.25)
-                img = img.crop((0, 0, icon_width, img.height))
                 max_height = 35
                 ratio = max_height / img.height
                 new_width = int(img.width * ratio)
@@ -1164,9 +1161,9 @@ def main():
 
     # Register and apply brand themes
     register_brand_themes(root.style)
-    theme = config.get('theme', 'ct-dark')
+    theme = config.get('theme', 'ct-light')
     if theme not in VALID_THEMES:
-        theme = 'ct-dark'
+        theme = 'ct-light'
     root.style.theme_use(theme)
 
     # Set window icon from logo
