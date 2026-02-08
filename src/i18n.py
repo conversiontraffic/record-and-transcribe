@@ -11,6 +11,29 @@ translations = {
         'menu.file': 'File',
         'menu.transcribe_file': 'Transcribe file...',
         'menu.exit': 'Exit',
+        'menu.help': 'Help',
+        'menu.system_check': 'System Check',
+
+        # System Check
+        'syscheck.title': 'System Status',
+        'syscheck.ffmpeg': 'FFmpeg (MP3 conversion)',
+        'syscheck.ffmpeg_desc': 'Not found - MP3 conversion may not work',
+        'syscheck.whisper': 'Whisper (transcription engine)',
+        'syscheck.whisper_desc': 'Not installed - transcription unavailable',
+        'syscheck.model': 'Whisper Model',
+        'syscheck.model_desc': 'Model "{model}" not yet downloaded (~460 MB)',
+        'syscheck.output_dir': 'Output folder: {path}',
+        'syscheck.gpu': 'GPU Acceleration (CUDA)',
+        'syscheck.gpu_desc': 'No NVIDIA GPU found - using CPU (slower)',
+
+        # GPU Installation
+        'menu.install_gpu': 'Install GPU Support...',
+        'gpu.already_installed': 'GPU support is already active!\nUsing: {gpu}',
+        'gpu.exe_not_supported': 'GPU support cannot be installed in the portable .exe version.\n\nTo use GPU acceleration, run from source:\n1. pip install torch --index-url https://download.pytorch.org/whl/cu121\n2. python src/recorder.py',
+        'gpu.confirm_install': 'This will install NVIDIA CUDA support for faster transcription (~2.5 GB download).\n\nRequires an NVIDIA GPU with CUDA support.\n\nProceed?',
+        'gpu.installing': 'Installing GPU support... This may take a few minutes.',
+        'gpu.install_success': 'GPU support installed! Restart the app to use GPU acceleration.',
+        'gpu.install_failed': 'GPU installation failed:\n{error}',
 
         # Audio Sources
         'devices.frame_title': 'Audio Sources',
@@ -94,6 +117,29 @@ translations = {
         'menu.file': 'Datei',
         'menu.transcribe_file': 'Datei transkribieren...',
         'menu.exit': 'Beenden',
+        'menu.help': 'Hilfe',
+        'menu.system_check': 'Systemcheck',
+
+        # System Check
+        'syscheck.title': 'Systemstatus',
+        'syscheck.ffmpeg': 'FFmpeg (MP3-Konvertierung)',
+        'syscheck.ffmpeg_desc': 'Nicht gefunden - MP3-Konvertierung funktioniert evtl. nicht',
+        'syscheck.whisper': 'Whisper (Transkriptions-Engine)',
+        'syscheck.whisper_desc': 'Nicht installiert - Transkription nicht verfügbar',
+        'syscheck.model': 'Whisper-Modell',
+        'syscheck.model_desc': 'Modell "{model}" noch nicht heruntergeladen (~460 MB)',
+        'syscheck.output_dir': 'Ausgabeordner: {path}',
+        'syscheck.gpu': 'GPU-Beschleunigung (CUDA)',
+        'syscheck.gpu_desc': 'Keine NVIDIA-GPU gefunden - CPU wird verwendet (langsamer)',
+
+        # GPU Installation
+        'menu.install_gpu': 'GPU-Support installieren...',
+        'gpu.already_installed': 'GPU-Support ist bereits aktiv!\nVerwendet: {gpu}',
+        'gpu.exe_not_supported': 'GPU-Support kann in der portablen .exe nicht installiert werden.\n\nFür GPU-Beschleunigung aus dem Quellcode starten:\n1. pip install torch --index-url https://download.pytorch.org/whl/cu121\n2. python src/recorder.py',
+        'gpu.confirm_install': 'NVIDIA CUDA-Support für schnellere Transkription installieren (~2,5 GB Download).\n\nBenötigt eine NVIDIA-GPU mit CUDA-Unterstützung.\n\nFortfahren?',
+        'gpu.installing': 'GPU-Support wird installiert... Das kann einige Minuten dauern.',
+        'gpu.install_success': 'GPU-Support installiert! App neustarten, um GPU-Beschleunigung zu nutzen.',
+        'gpu.install_failed': 'GPU-Installation fehlgeschlagen:\n{error}',
 
         # Audio Sources
         'devices.frame_title': 'Audio-Quellen',

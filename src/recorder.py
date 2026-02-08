@@ -70,7 +70,7 @@ def register_brand_themes(style):
         name='ct-dark',
         themetype='dark',
         colors=Colors(
-            primary='#FFD700',
+            primary='#1a5276',
             secondary='#1a4a6e',
             success='#28a745',
             info='#2196F3',
@@ -80,8 +80,8 @@ def register_brand_themes(style):
             dark='#012b45',
             bg='#0d1b2a',
             fg='#e0e0e0',
-            selectbg='#FFD700',
-            selectfg='#012b45',
+            selectbg='#1a5276',
+            selectfg='#ffffff',
             border='#1a3a5c',
             inputbg='#132d46',
             inputfg='#e0e0e0',
@@ -96,7 +96,7 @@ def register_brand_themes(style):
             secondary='#6c757d',
             success='#28a745',
             info='#2196F3',
-            warning='#FFD700',
+            warning='#FFB300',
             danger='#dc3545',
             light='#f8f9fa',
             dark='#012b45',
@@ -211,11 +211,125 @@ class RecordAndTranscribeApp:
             command=lambda: self._set_theme(self.THEME_DARK)
         )
 
+        # Help menu with system check
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label=t('menu.help'), menu=help_menu)
+        help_menu.add_command(label=t('menu.system_check'), command=self._show_system_check)
+        help_menu.add_command(label=t('menu.install_gpu'), command=self._install_gpu_support)
+
+    def _check_cuda_available(self):
+        """Check if CUDA GPU is available via PyTorch."""
+        try:
+            import torch
+            return torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
+        except Exception:
+            return False, None
+
+    def _show_system_check(self):
+        """Show a dialog with system status checks."""
+        import shutil
+
+        checks = []
+
+        # FFmpeg
+        ffmpeg_ok = shutil.which('ffmpeg') is not None
+        checks.append((t('syscheck.ffmpeg'), ffmpeg_ok, t('syscheck.ffmpeg_desc')))
+
+        # Whisper
+        whisper_ok = check_whisper_installed()
+        checks.append((t('syscheck.whisper'), whisper_ok, t('syscheck.whisper_desc')))
+
+        # Whisper Model
+        model_ok = check_whisper_model_cached(self.transcriber.model_name)
+        model_desc = t('syscheck.model_desc', model=self.transcriber.model_name)
+        checks.append((t('syscheck.model'), model_ok, model_desc))
+
+        # GPU/CUDA
+        cuda_ok, gpu_name = self._check_cuda_available()
+        cuda_desc = t('syscheck.gpu_desc')
+        if cuda_ok and gpu_name:
+            checks.append((f'{t("syscheck.gpu")} ({gpu_name})', True, ''))
+        else:
+            checks.append((t('syscheck.gpu'), False, cuda_desc))
+
+        # Build message
+        lines = [t('syscheck.title'), '']
+        for name, ok, desc in checks:
+            icon = '\u2705' if ok else '\u274C'
+            lines.append(f'{icon}  {name}')
+            if not ok and desc:
+                lines.append(f'      {desc}')
+        lines.append('')
+        lines.append(t('syscheck.output_dir', path=self.output_dir_var.get()))
+
+        messagebox.showinfo(t('menu.system_check'), '\n'.join(lines))
+
+    def _install_gpu_support(self):
+        """Install CUDA PyTorch for GPU-accelerated transcription."""
+        # Check if already available
+        cuda_ok, gpu_name = self._check_cuda_available()
+        if cuda_ok:
+            messagebox.showinfo(
+                t('menu.install_gpu'),
+                t('gpu.already_installed', gpu=gpu_name)
+            )
+            return
+
+        # Check if running from .exe (can't pip install)
+        if hasattr(sys, '_MEIPASS'):
+            messagebox.showinfo(
+                t('menu.install_gpu'),
+                t('gpu.exe_not_supported')
+            )
+            return
+
+        # Confirm installation
+        if not messagebox.askyesno(
+            t('menu.install_gpu'),
+            t('gpu.confirm_install')
+        ):
+            return
+
+        self.status_var.set(t('gpu.installing'))
+        self.root.update()
+
+        def install():
+            try:
+                result = subprocess.run(
+                    [sys.executable, '-m', 'pip', 'install',
+                     'torch', 'torchvision', 'torchaudio',
+                     '--index-url', 'https://download.pytorch.org/whl/cu121'],
+                    capture_output=True, text=True, timeout=600
+                )
+                if result.returncode == 0:
+                    self.root.after(0, lambda: (
+                        self.status_var.set(t('status.ready')),
+                        messagebox.showinfo(
+                            t('menu.install_gpu'),
+                            t('gpu.install_success')
+                        )
+                    ))
+                else:
+                    self.root.after(0, lambda: (
+                        self.status_var.set(t('status.ready')),
+                        messagebox.showerror(
+                            t('dialog.error'),
+                            t('gpu.install_failed', error=result.stderr[-500:] if result.stderr else 'Unknown error')
+                        )
+                    ))
+            except Exception as e:
+                self.root.after(0, lambda: (
+                    self.status_var.set(t('status.ready')),
+                    messagebox.showerror(t('dialog.error'), str(e))
+                ))
+
+        threading.Thread(target=install, daemon=True).start()
+
     def _load_config(self):
         """Load configuration from file."""
         default_config = {
             'output_dir': str(DEFAULT_OUTPUT_DIR),
-            'auto_transcribe': False,
+            'auto_transcribe': True,
             'language': 'Auto',
             'ui_language': 'en',
             'theme': 'ct-dark'
