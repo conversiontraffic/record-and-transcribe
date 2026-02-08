@@ -67,7 +67,7 @@ LOGO_PATH = get_resource_path('assets' / Path('logo.png'))
 
 # Branding
 APP_NAME = "Record & Transcribe"
-APP_VERSION = "0.1.1"
+APP_VERSION = "0.1.2"
 APP_SUBTITLE = "by conversion-traffic.de"
 
 # Brand colors
@@ -245,10 +245,10 @@ class RecordAndTranscribeApp:
         # Help menu with system check
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=t('menu.help'), menu=help_menu)
+        help_menu.add_command(label=t('menu.check_updates'), command=self._manual_update_check)
+        help_menu.add_separator()
         help_menu.add_command(label=t('menu.system_check'), command=self._show_system_check)
         help_menu.add_command(label=t('menu.install_gpu'), command=self._install_gpu_support)
-        help_menu.add_separator()
-        help_menu.add_command(label=t('menu.check_updates'), command=self._manual_update_check)
         help_menu.add_command(label=t('menu.about'), command=self._show_about)
 
     def _check_cuda_available(self):
@@ -1166,10 +1166,13 @@ def main():
         theme = 'ct-light'
     root.style.theme_use(theme)
 
-    # Set window icon from logo
+    # Set window icon
+    ico_path = get_resource_path('assets' / Path('logo.ico'))
     try:
-        from PIL import Image, ImageTk
-        if LOGO_PATH.exists():
+        if ico_path.exists():
+            root.iconbitmap(str(ico_path))
+        elif LOGO_PATH.exists():
+            from PIL import Image, ImageTk
             img = Image.open(LOGO_PATH)
             icon_img = img.resize((32, 32), Image.Resampling.LANCZOS)
             photo = ImageTk.PhotoImage(icon_img)

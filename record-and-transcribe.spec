@@ -30,6 +30,7 @@ a = Analysis(
     binaries=binaries,
     datas=[
         ('assets/logo.png', 'assets'),
+        ('assets/logo.ico', 'assets'),
     ] + whisper_assets,
     hiddenimports=[
         'whisper',
@@ -74,5 +75,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,
+    icon='assets/logo.ico',
 )

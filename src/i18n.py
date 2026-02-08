@@ -14,7 +14,7 @@ translations = {
         'menu.help': 'Help',
         'menu.system_check': 'System Check',
         'menu.about': 'About...',
-        'menu.check_updates': 'Check for Updates...',
+        'menu.check_updates': 'Update...',
 
         # System Check
         'syscheck.title': 'System Status',
@@ -139,7 +139,7 @@ translations = {
         'menu.help': 'Hilfe',
         'menu.system_check': 'Systemcheck',
         'menu.about': '\u00dcber...',
-        'menu.check_updates': 'Nach Updates suchen...',
+        'menu.check_updates': 'Update...',
 
         # System Check
         'syscheck.title': 'Systemstatus',
