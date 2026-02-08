@@ -18,7 +18,7 @@ from pathlib import Path
 
 from i18n import t, set_language, get_language
 from audio_capture import AudioCapture, convert_to_mp3
-from transcriber import Transcriber, check_whisper_installed, extract_audio_from_video
+from transcriber import Transcriber, check_whisper_installed, check_whisper_model_cached, extract_audio_from_video
 from widgets import RoundedButton
 
 
@@ -59,6 +59,9 @@ APP_SUBTITLE = "by conversion-traffic.de"
 BRAND_DARK_BLUE = '#012b45'
 BRAND_GOLD = '#FFD700'
 BRAND_AMBER = '#FFB300'
+
+# Valid themes (only our custom themes are allowed)
+VALID_THEMES = {'ct-dark', 'ct-light'}
 
 
 def register_brand_themes(style):
@@ -224,6 +227,9 @@ class RecordAndTranscribeApp:
                     default_config.update(saved)
             except Exception:
                 pass
+        # Validate theme - fall back to ct-dark if invalid
+        if default_config.get('theme') not in VALID_THEMES:
+            default_config['theme'] = 'ct-dark'
         return default_config
 
     def _save_config(self):
@@ -524,7 +530,7 @@ class RecordAndTranscribeApp:
         self.cancel_trans_btn.pack(fill=tk.X)
         self._rounded_buttons.append(self.cancel_trans_btn)
 
-        # Check whisper installation
+        # Check whisper installation and model status
         if not check_whisper_installed():
             self.auto_transcribe_var.set(False)
             trans_check.config(state='disabled')
@@ -534,6 +540,15 @@ class RecordAndTranscribeApp:
                 foreground='red'
             )
             warning_label.pack(anchor=tk.W, pady=(5, 0))
+        elif not check_whisper_model_cached(self.transcriber.model_name):
+            info_label = ttk.Label(
+                trans_inner,
+                text=t('transcription.model_first_download'),
+                foreground='orange',
+                wraplength=360,
+                font=('Segoe UI', 8)
+            )
+            info_label.pack(anchor=tk.W, pady=(5, 0))
 
     def _set_theme(self, theme_name):
         """Switch theme live and save to config."""
@@ -669,12 +684,22 @@ class RecordAndTranscribeApp:
                     def on_progress(percent):
                         self.root.after(0, lambda p=percent: self._update_transcription_progress(p))
 
+                    def on_status(status_key):
+                        status_map = {
+                            'downloading_model': t('status.downloading_model'),
+                            'loading_model': t('status.loading_model'),
+                        }
+                        msg = status_map.get(status_key)
+                        if msg:
+                            self.root.after(0, lambda m=msg: self.status_var.set(m))
+
                     lang_labels = self._get_language_labels()
                     language = lang_labels.get(self.lang_var.get())
                     txt_file = self.transcriber.transcribe(
                         mp3_file,
                         language=language,
-                        on_progress=on_progress
+                        on_progress=on_progress,
+                        on_status=on_status
                     )
 
                     self.root.after(0, lambda: (
@@ -836,6 +861,15 @@ class RecordAndTranscribeApp:
                 def on_progress(percent):
                     self.root.after(0, lambda p=percent: self._update_transcription_progress(p))
 
+                def on_status(status_key):
+                    status_map = {
+                        'downloading_model': t('status.downloading_model'),
+                        'loading_model': t('status.loading_model'),
+                    }
+                    msg = status_map.get(status_key)
+                    if msg:
+                        self.root.after(0, lambda m=msg: self.status_var.set(m))
+
                 lang_labels = self._get_language_labels()
                 language = lang_labels.get(self.lang_var.get())
                 output_dir = self.output_dir_var.get()
@@ -844,7 +878,8 @@ class RecordAndTranscribeApp:
                     audio_path,
                     language=language,
                     output_dir=output_dir,
-                    on_progress=on_progress
+                    on_progress=on_progress,
+                    on_status=on_status
                 )
 
                 self.root.after(0, lambda: (
@@ -889,13 +924,16 @@ def main():
     root = ttk.Window(
         title=APP_NAME,
         themename='darkly',
-        size=(420, 700),
-        resizable=(False, False)
+        size=(420, 720),
+        resizable=(False, True)
     )
+    root.minsize(420, 600)
 
     # Register and apply brand themes
     register_brand_themes(root.style)
     theme = config.get('theme', 'ct-dark')
+    if theme not in VALID_THEMES:
+        theme = 'ct-dark'
     root.style.theme_use(theme)
 
     # Set window icon from logo

@@ -98,7 +98,8 @@ class Transcriber:
         output_format: str = 'txt',
         output_dir: str | Path = None,
         callback: Optional[Callable[[str], None]] = None,
-        on_progress: Optional[Callable[[int], None]] = None
+        on_progress: Optional[Callable[[int], None]] = None,
+        on_status: Optional[Callable[[str], None]] = None
     ) -> Path:
         """
         Transcribe audio file using Whisper Python API.
@@ -110,6 +111,7 @@ class Transcriber:
             output_dir: Directory to save output (default: same as audio file)
             callback: Optional callback function called when done with output path
             on_progress: Optional callback for progress updates (receives percent 0-100)
+            on_status: Optional callback for status updates (receives status key string)
 
         Returns:
             Path to the transcription file
@@ -125,7 +127,19 @@ class Transcriber:
         if self.model is None:
             if on_progress:
                 on_progress(0)
-            self.model = whisper.load_model(self.model_name)
+            model_cached = check_whisper_model_cached(self.model_name)
+            if not model_cached and on_status:
+                on_status('downloading_model')
+            elif on_status:
+                on_status('loading_model')
+            try:
+                self.model = whisper.load_model(self.model_name)
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to load Whisper model '{self.model_name}': {e}"
+                )
+            if on_status:
+                on_status('model_ready')
 
         self.is_transcribing = True
         self._cancelled = False
@@ -262,6 +276,21 @@ def check_whisper_installed() -> bool:
         import whisper
         return True
     except ImportError:
+        return False
+
+
+def check_whisper_model_cached(model_name: str = 'small') -> bool:
+    """Check if the Whisper model is already downloaded/cached."""
+    try:
+        import whisper
+        import os
+        url = whisper._MODELS.get(model_name)
+        if url is None:
+            return False
+        default_download_root = os.path.join(os.path.expanduser("~"), ".cache", "whisper")
+        expected = os.path.join(default_download_root, os.path.basename(url))
+        return os.path.exists(expected)
+    except Exception:
         return False
 
 

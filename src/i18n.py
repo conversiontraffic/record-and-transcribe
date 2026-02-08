@@ -28,6 +28,8 @@ translations = {
         'status.processing': 'Processing...',
         'status.transcribing': 'Transcribing...',
         'status.extracting_audio': 'Extracting audio...',
+        'status.downloading_model': 'Downloading Whisper model (~460 MB)... Please wait.',
+        'status.loading_model': 'Loading Whisper model...',
         'status.cancelled': 'Cancelled',
 
         # Buttons
@@ -49,6 +51,7 @@ translations = {
         'transcription.progress': 'Transcribing... {percent}%',
         'transcription.cancel': 'Cancel',
         'transcription.whisper_not_installed': 'Whisper not installed',
+        'transcription.model_first_download': 'Note: The Whisper model (~460 MB) will be downloaded on first transcription. Internet connection required.',
 
         # Transcription language names
         'lang.auto': 'Auto',
@@ -108,6 +111,8 @@ translations = {
         'status.processing': 'Verarbeite...',
         'status.transcribing': 'Transkribiere...',
         'status.extracting_audio': 'Extrahiere Audio...',
+        'status.downloading_model': 'Whisper-Modell wird heruntergeladen (~460 MB)... Bitte warten.',
+        'status.loading_model': 'Whisper-Modell wird geladen...',
         'status.cancelled': 'Abgebrochen',
 
         # Buttons
@@ -129,6 +134,7 @@ translations = {
         'transcription.progress': 'Transkribiere... {percent}%',
         'transcription.cancel': 'Abbrechen',
         'transcription.whisper_not_installed': 'Whisper nicht installiert',
+        'transcription.model_first_download': 'Hinweis: Das Whisper-Modell (~460 MB) wird bei der ersten Transkription heruntergeladen. Internetverbindung erforderlich.',
 
         # Transcription language names
         'lang.auto': 'Auto',
