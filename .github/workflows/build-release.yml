@@ -41,16 +41,43 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Rename executable
+      - name: Rename portable executable
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
           Rename-Item -Path "dist/RecordAndTranscribe.exe" -NewName "record-and-transcribe-${version}-windows.exe"
 
+      - name: Update version in installer script
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}" -replace '^v', ''
+          (Get-Content installer.iss) -replace '#define MyAppVersion ".*"', "#define MyAppVersion `"$version`"" | Set-Content installer.iss
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Rename installer
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $setupFile = Get-ChildItem -Path "dist" -Filter "record-and-transcribe-setup-*" | Select-Object -First 1
+          if ($setupFile) {
+            Rename-Item -Path $setupFile.FullName -NewName "record-and-transcribe-setup-${version}-windows.exe"
+          }
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/record-and-transcribe-${{ steps.version.outputs.version }}-windows.exe
+          files: |
+            dist/record-and-transcribe-${{ steps.version.outputs.version }}-windows.exe
+            dist/record-and-transcribe-setup-${{ steps.version.outputs.version }}-windows.exe
           generate_release_notes: true
           draft: false
           prerelease: false

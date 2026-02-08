@@ -13,6 +13,7 @@ translations = {
         'menu.exit': 'Exit',
         'menu.help': 'Help',
         'menu.system_check': 'System Check',
+        'menu.about': 'About...',
 
         # System Check
         'syscheck.title': 'System Status',
@@ -103,6 +104,19 @@ translations = {
         'filedialog.video': 'Video Files',
         'filedialog.all': 'All Files',
 
+        # About
+        'about.description': 'Simple audio recorder with built-in transcription.\nRecord meetings, interviews, or any audio\nand transcribe locally using OpenAI Whisper.',
+        'about.license': 'License: GPL-3.0',
+        'about.author': 'by conversion-traffic.de',
+
+        # Update
+        'update.title': 'Update Available',
+        'update.downloading': 'Downloading update...',
+        'update.ready': 'Version {version} is ready to install!\n\nInstall now and restart?',
+        'update.failed': 'Update check failed.',
+        'update.install_btn': 'Install & Restart',
+        'update.later_btn': 'Later',
+
         # Settings
         'settings.frame_title': 'Settings',
         'settings.ui_language': 'Interface:',
@@ -119,6 +133,7 @@ translations = {
         'menu.exit': 'Beenden',
         'menu.help': 'Hilfe',
         'menu.system_check': 'Systemcheck',
+        'menu.about': '\u00dcber...',
 
         # System Check
         'syscheck.title': 'Systemstatus',
@@ -208,6 +223,19 @@ translations = {
         'filedialog.audio': 'Audio Dateien',
         'filedialog.video': 'Video Dateien',
         'filedialog.all': 'Alle Dateien',
+
+        # About
+        'about.description': 'Einfacher Audio-Recorder mit integrierter Transkription.\nMeetings, Interviews oder beliebiges Audio aufnehmen\nund lokal mit OpenAI Whisper transkribieren.',
+        'about.license': 'Lizenz: GPL-3.0',
+        'about.author': 'von conversion-traffic.de',
+
+        # Update
+        'update.title': 'Update verf\u00fcgbar',
+        'update.downloading': 'Update wird heruntergeladen...',
+        'update.ready': 'Version {version} ist bereit zur Installation!\n\nJetzt installieren und neustarten?',
+        'update.failed': 'Update-Pr\u00fcfung fehlgeschlagen.',
+        'update.install_btn': 'Installieren & Neustarten',
+        'update.later_btn': 'Sp\u00e4ter',
 
         # Settings
         'settings.frame_title': 'Einstellungen',

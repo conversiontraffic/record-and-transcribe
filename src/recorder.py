@@ -20,6 +20,7 @@ from i18n import t, set_language, get_language
 from audio_capture import AudioCapture, convert_to_mp3
 from transcriber import Transcriber, check_whisper_installed, check_whisper_model_cached, extract_audio_from_video
 from widgets import RoundedButton
+from update_checker import check_for_updates, download_update
 
 
 def get_resource_path(relative_path):
@@ -53,6 +54,7 @@ LOGO_PATH = get_resource_path('assets' / Path('logo.png'))
 
 # Branding
 APP_NAME = "Record & Transcribe"
+APP_VERSION = "0.1.0"
 APP_SUBTITLE = "by conversion-traffic.de"
 
 # Brand colors
@@ -162,6 +164,9 @@ class RecordAndTranscribeApp:
         # Cleanup on window close
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
+        # Check for updates (non-blocking)
+        self._check_for_updates()
+
     def _on_close(self):
         """Clean up all resources when window is closed."""
         # Stop audio preview
@@ -229,6 +234,8 @@ class RecordAndTranscribeApp:
         menubar.add_cascade(label=t('menu.help'), menu=help_menu)
         help_menu.add_command(label=t('menu.system_check'), command=self._show_system_check)
         help_menu.add_command(label=t('menu.install_gpu'), command=self._install_gpu_support)
+        help_menu.add_separator()
+        help_menu.add_command(label=t('menu.about'), command=self._show_about)
 
     def _check_cuda_available(self):
         """Check if CUDA GPU is available via PyTorch."""
@@ -337,6 +344,50 @@ class RecordAndTranscribeApp:
                 ))
 
         threading.Thread(target=install, daemon=True).start()
+
+    def _show_about(self):
+        """Show About dialog with version, description, and license."""
+        lines = [
+            f"{APP_NAME} v{APP_VERSION}",
+            f"{t('about.author')}",
+            "",
+            t('about.description'),
+            "",
+            t('about.license'),
+        ]
+        messagebox.showinfo(t('menu.about'), '\n'.join(lines))
+
+    def _check_for_updates(self):
+        """Check for updates in background thread."""
+        def on_result(version, url, filename):
+            if version and url and filename:
+                # Download the installer in background
+                self.root.after(0, lambda: self.status_var.set(t('update.downloading')))
+                download_update(
+                    url, filename,
+                    on_complete=lambda path: self.root.after(
+                        0, lambda: self._show_update_dialog(version, path)
+                    ),
+                    on_error=lambda err: self.root.after(
+                        0, lambda: self.status_var.set(t('status.ready'))
+                    )
+                )
+
+        check_for_updates(APP_VERSION, on_result)
+
+    def _show_update_dialog(self, version, installer_path):
+        """Show dialog offering to install downloaded update."""
+        self.status_var.set(t('status.ready'))
+        result = messagebox.askyesno(
+            t('update.title'),
+            t('update.ready', version=version)
+        )
+        if result:
+            try:
+                subprocess.Popen([installer_path])
+                self._on_close()
+            except Exception:
+                pass
 
     def _load_config(self):
         """Load configuration from file."""
@@ -1076,7 +1127,7 @@ def main():
 
     # Create window with temporary theme, then switch to brand theme
     root = ttk.Window(
-        title=APP_NAME,
+        title=f"{APP_NAME} v{APP_VERSION}",
         themename='darkly',
         size=(420, 720),
         resizable=(False, True)
