@@ -67,7 +67,7 @@ LOGO_PATH = get_resource_path('assets' / Path('logo.png'))
 
 # Branding
 APP_NAME = "Record & Transcribe"
-APP_VERSION = "0.1.3"
+APP_VERSION = "0.1.4"
 APP_SUBTITLE = "by conversion-traffic.de"
 
 # Brand colors
