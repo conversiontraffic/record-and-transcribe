@@ -39,17 +39,25 @@ Um System-Audio aufzunehmen (z.B. Meeting-Audio von Zoom/Teams), brauchst du ein
 
 ## Schnellstart
 
-### Option 1: .exe herunterladen (Empfohlen)
+### Option 1: Installer (Empfohlen)
 
-1. Von [Releases](../../releases) herunterladen
-2. `record-and-transcribe-vX.Y.Z-windows.exe` ausfuehren
+1. `record-and-transcribe-setup-vX.Y.Z-windows.exe` von [Releases](../../releases) herunterladen
+2. Installer ausfuehren (Startmenue-Eintrag + optionale Desktop-Verknuepfung)
 3. Audio-Quellen auswaehlen
 4. "Aufnahme starten" klicken
 
-### Option 2: Aus dem Quellcode starten
+### Option 2: Portable .exe
+
+1. `record-and-transcribe-vX.Y.Z-windows.exe` von [Releases](../../releases) herunterladen
+2. Aus beliebigem Ordner starten - keine Installation noetig
+3. Einstellungen werden neben der .exe gespeichert
+
+> **Windows SmartScreen:** Beim ersten Start zeigt Windows evtl. "Der Computer wurde geschuetzt". Auf **"Weitere Informationen"** und dann **"Trotzdem ausfuehren"** klicken. Das passiert, weil die App nicht Code-signiert ist (sie ist Open Source und kostenlos).
+
+### Option 3: Aus dem Quellcode starten
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/record-and-transcribe.git
+git clone https://github.com/conversiontraffic/record-and-transcribe.git
 cd record-and-transcribe
 
 # Abhaengigkeiten installieren
@@ -100,7 +108,7 @@ Ausgabe: `dist/RecordAndTranscribe.exe`
 
 ## Konfiguration
 
-Einstellungen werden in `config.json` neben der .exe gespeichert (oder im Projektordner bei Ausfuehrung aus dem Quellcode):
+Einstellungen werden in `config.json` gespeichert. Speicherort: `%APPDATA%\Record & Transcribe\` (Installer) oder neben der .exe (Portable).
 
 - **Ausgabeordner** - Wo Aufnahmen gespeichert werden (Standard: `~/Dokumente/Record & Transcribe`)
 - **Auto-Transkription** - Automatisch nach Aufnahme transkribieren

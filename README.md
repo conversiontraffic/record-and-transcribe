@@ -39,17 +39,25 @@ To record system audio (e.g., meeting audio from Zoom/Teams), you need one of:
 
 ## Quick Start
 
-### Option 1: Download the .exe (Recommended)
+### Option 1: Installer (Recommended)
 
-1. Download from [Releases](../../releases)
-2. Run `record-and-transcribe-vX.Y.Z-windows.exe`
+1. Download `record-and-transcribe-setup-vX.Y.Z-windows.exe` from [Releases](../../releases)
+2. Run the installer (Start Menu shortcut + optional Desktop shortcut)
 3. Select your audio sources
 4. Click "Start Recording"
 
-### Option 2: Run from Source
+### Option 2: Portable .exe
+
+1. Download `record-and-transcribe-vX.Y.Z-windows.exe` from [Releases](../../releases)
+2. Run from any folder - no installation needed
+3. Settings are saved next to the .exe
+
+> **Windows SmartScreen:** On first launch, Windows may show "Windows protected your PC". Click **"More info"** then **"Run anyway"**. This happens because the app is not code-signed (it's open source and free).
+
+### Option 3: Run from Source
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/record-and-transcribe.git
+git clone https://github.com/conversiontraffic/record-and-transcribe.git
 cd record-and-transcribe
 
 # Install dependencies
@@ -100,7 +108,7 @@ Output: `dist/RecordAndTranscribe.exe`
 
 ## Configuration
 
-Settings are saved in `config.json` next to the executable (or in the project root when running from source):
+Settings are saved in `config.json`. Location: `%APPDATA%\Record & Transcribe\` (Installer) or next to the .exe (Portable).
 
 - **Output folder** - Where recordings are saved (default: `~/Documents/Record & Transcribe`)
 - **Auto-transcribe** - Automatically transcribe after recording
