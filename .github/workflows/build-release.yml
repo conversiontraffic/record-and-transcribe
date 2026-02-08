@@ -61,18 +61,27 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
-          Rename-Item -Path "dist/RecordAndTranscribe.exe" -NewName "record-and-transcribe-${version}-windows.exe"
-          $setupFile = Get-ChildItem -Path "dist" -Filter "record-and-transcribe-setup-*" | Select-Object -First 1
+          Rename-Item -Path "dist/RecordAndTranscribe.exe" -NewName "Record-and-Transcribe-${version}-Portable.exe"
+          $setupFile = Get-ChildItem -Path "dist" -Filter "Record-and-Transcribe-*-Setup*" | Select-Object -First 1
           if ($setupFile) {
-            Rename-Item -Path $setupFile.FullName -NewName "record-and-transcribe-setup-${version}-windows.exe"
+            Rename-Item -Path $setupFile.FullName -NewName "Record-and-Transcribe-${version}-Setup.exe"
           }
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/record-and-transcribe-${{ steps.version.outputs.version }}-windows.exe
-            dist/record-and-transcribe-setup-${{ steps.version.outputs.version }}-windows.exe
+            dist/Record-and-Transcribe-${{ steps.version.outputs.version }}-Setup.exe
+            dist/Record-and-Transcribe-${{ steps.version.outputs.version }}-Portable.exe
+          body: |
+            ## Download
+
+            | File | Description |
+            |------|-------------|
+            | **Record-and-Transcribe-${{ steps.version.outputs.version }}-Setup.exe** | **Installer (recommended)** - Start Menu + Desktop shortcut, auto-updates |
+            | Record-and-Transcribe-${{ steps.version.outputs.version }}-Portable.exe | Portable - single .exe, no installation needed |
+
+            > **Windows SmartScreen:** On first launch click "More info" > "Run anyway" (app is open source, not code-signed).
           generate_release_notes: true
           draft: false
           prerelease: false
