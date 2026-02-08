@@ -2,8 +2,21 @@
 # PyInstaller spec file for Record & Transcribe
 
 import os
+import importlib
 
 block_cipher = None
+
+# Find whisper assets directory
+whisper_assets = []
+try:
+    whisper_spec = importlib.util.find_spec('whisper')
+    if whisper_spec and whisper_spec.origin:
+        whisper_dir = os.path.dirname(whisper_spec.origin)
+        assets_dir = os.path.join(whisper_dir, 'assets')
+        if os.path.isdir(assets_dir):
+            whisper_assets = [(assets_dir, os.path.join('whisper', 'assets'))]
+except Exception:
+    pass
 
 # Check if bundled FFmpeg exists
 ffmpeg_path = os.path.join('bundled_ffmpeg', 'ffmpeg.exe')
@@ -17,7 +30,7 @@ a = Analysis(
     binaries=binaries,
     datas=[
         ('assets/logo.png', 'assets'),
-    ],
+    ] + whisper_assets,
     hiddenimports=[
         'whisper',
         'tiktoken_ext',
