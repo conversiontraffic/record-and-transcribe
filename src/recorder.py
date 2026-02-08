@@ -163,9 +163,22 @@ class RecordAndTranscribeApp:
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _on_close(self):
-        """Clean up when window is closed."""
+        """Clean up all resources when window is closed."""
+        # Stop audio preview
         self._stop_preview()
+        # Stop recording if active
+        if self.is_recording:
+            self.is_recording = False
+            try:
+                self.audio_capture.stop_recording()
+            except Exception:
+                pass
+        # Cancel transcription if active
+        if self.is_transcribing:
+            self.transcriber.cancel()
         self.root.destroy()
+        # Force exit to kill any remaining threads
+        os._exit(0)
 
     @staticmethod
     def _open_in_explorer(file_path):
@@ -850,7 +863,7 @@ class RecordAndTranscribeApp:
             finally:
                 self.root.after(0, self._reset_ui)
 
-        threading.Thread(target=process).start()
+        threading.Thread(target=process, daemon=True).start()
 
     def _reset_ui(self):
         """Reset UI to ready state."""
@@ -1024,7 +1037,7 @@ class RecordAndTranscribeApp:
             finally:
                 self.root.after(0, self._reset_ui)
 
-        threading.Thread(target=process).start()
+        threading.Thread(target=process, daemon=True).start()
 
 
 def main():
