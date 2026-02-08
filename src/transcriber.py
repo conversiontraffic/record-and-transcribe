@@ -280,16 +280,31 @@ def check_whisper_installed() -> bool:
 
 
 def check_whisper_model_cached(model_name: str = 'small') -> bool:
-    """Check if the Whisper model is already downloaded/cached."""
+    """Check if the Whisper model is already downloaded and complete."""
+    # Minimum expected file sizes in bytes (approximate)
+    MODEL_MIN_SIZES = {
+        'tiny': 70_000_000,
+        'base': 130_000_000,
+        'small': 450_000_000,
+        'medium': 1_400_000_000,
+        'large': 2_800_000_000,
+    }
     try:
         import whisper
         import os
         url = whisper._MODELS.get(model_name)
         if url is None:
             return False
-        default_download_root = os.path.join(os.path.expanduser("~"), ".cache", "whisper")
-        expected = os.path.join(default_download_root, os.path.basename(url))
-        return os.path.exists(expected)
+        # Check default cache location
+        default_cache = os.path.join(os.path.expanduser("~"), ".cache")
+        download_root = os.path.join(os.getenv("XDG_CACHE_HOME", default_cache), "whisper")
+        expected = os.path.join(download_root, os.path.basename(url))
+        if not os.path.exists(expected):
+            return False
+        # Verify file is not incomplete (partial download)
+        file_size = os.path.getsize(expected)
+        min_size = MODEL_MIN_SIZES.get(model_name, 50_000_000)
+        return file_size >= min_size
     except Exception:
         return False
 

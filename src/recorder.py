@@ -833,17 +833,19 @@ class RecordAndTranscribeApp:
                     ))
 
             except RuntimeError as e:
-                if "cancelled" in str(e).lower():
+                error_msg = str(e)
+                if "cancelled" in error_msg.lower():
                     pass
                 else:
-                    self.root.after(0, lambda: messagebox.showerror(
+                    self.root.after(0, lambda msg=error_msg: messagebox.showerror(
                         t('dialog.error'),
-                        t('dialog.error_processing', error=str(e))
+                        t('dialog.error_processing', error=msg)
                     ))
             except Exception as e:
-                self.root.after(0, lambda: messagebox.showerror(
+                error_msg = str(e)
+                self.root.after(0, lambda msg=error_msg: messagebox.showerror(
                     t('dialog.error'),
-                    t('dialog.error_processing', error=str(e))
+                    t('dialog.error_processing', error=msg)
                 ))
             finally:
                 self.root.after(0, self._reset_ui)
@@ -1005,17 +1007,19 @@ class RecordAndTranscribeApp:
                 ))
 
             except RuntimeError as e:
-                if "cancelled" in str(e).lower():
+                error_msg = str(e)
+                if "cancelled" in error_msg.lower():
                     pass
                 else:
-                    self.root.after(0, lambda: messagebox.showerror(
+                    self.root.after(0, lambda msg=error_msg: messagebox.showerror(
                         t('dialog.error'),
-                        t('dialog.error_transcription', error=str(e))
+                        t('dialog.error_transcription', error=msg)
                     ))
             except Exception as e:
-                self.root.after(0, lambda: messagebox.showerror(
+                error_msg = str(e)
+                self.root.after(0, lambda msg=error_msg: messagebox.showerror(
                     t('dialog.error'),
-                    t('dialog.error_transcription', error=str(e))
+                    t('dialog.error_transcription', error=msg)
                 ))
             finally:
                 self.root.after(0, self._reset_ui)
