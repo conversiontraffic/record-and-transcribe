@@ -24,6 +24,8 @@ translations = {
         'syscheck.model': 'Whisper Model',
         'syscheck.model_desc': 'Model "{model}" not yet downloaded (~460 MB)',
         'syscheck.output_dir': 'Output folder: {path}',
+        'syscheck.loopback': 'System Audio (Loopback)',
+        'syscheck.loopback_desc': 'No loopback device found - install VB-Audio Virtual Cable (free): vb-audio.com/Cable',
         'syscheck.gpu': 'GPU Acceleration (CUDA)',
         'syscheck.gpu_desc': 'No NVIDIA GPU found - using CPU (slower)',
 
@@ -144,6 +146,8 @@ translations = {
         'syscheck.model': 'Whisper-Modell',
         'syscheck.model_desc': 'Modell "{model}" noch nicht heruntergeladen (~460 MB)',
         'syscheck.output_dir': 'Ausgabeordner: {path}',
+        'syscheck.loopback': 'System-Audio (Loopback)',
+        'syscheck.loopback_desc': 'Kein Loopback-Ger\u00e4t gefunden - VB-Audio Virtual Cable installieren (kostenlos): vb-audio.com/Cable',
         'syscheck.gpu': 'GPU-Beschleunigung (CUDA)',
         'syscheck.gpu_desc': 'Keine NVIDIA-GPU gefunden - CPU wird verwendet (langsamer)',
 

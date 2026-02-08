@@ -264,6 +264,10 @@ class RecordAndTranscribeApp:
         model_desc = t('syscheck.model_desc', model=self.transcriber.model_name)
         checks.append((t('syscheck.model'), model_ok, model_desc))
 
+        # System Audio (Loopback)
+        loopback_ok = len(AudioCapture.get_loopback_devices()) > 0
+        checks.append((t('syscheck.loopback'), loopback_ok, t('syscheck.loopback_desc')))
+
         # GPU/CUDA
         cuda_ok, gpu_name = self._check_cuda_available()
         cuda_desc = t('syscheck.gpu_desc')
