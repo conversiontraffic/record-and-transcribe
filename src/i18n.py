@@ -14,6 +14,7 @@ translations = {
         'menu.help': 'Help',
         'menu.system_check': 'System Check',
         'menu.about': 'About...',
+        'menu.check_updates': 'Check for Updates...',
 
         # System Check
         'syscheck.title': 'System Status',
@@ -28,6 +29,7 @@ translations = {
         'syscheck.loopback_desc': 'No loopback device found - install VB-Audio Virtual Cable (free): vb-audio.com/Cable',
         'syscheck.gpu': 'GPU Acceleration (CUDA)',
         'syscheck.gpu_desc': 'No NVIDIA GPU found - using CPU (slower)',
+        'syscheck.gpu_exe_desc': 'Not available in .exe version - run from source for GPU support',
 
         # GPU Installation
         'menu.install_gpu': 'Install GPU Support...',
@@ -116,6 +118,7 @@ translations = {
         'update.downloading': 'Downloading update...',
         'update.ready': 'Version {version} is ready to install!\n\nInstall now and restart?',
         'update.failed': 'Update check failed.',
+        'update.up_to_date': 'You are using the latest version (v{version}).',
         'update.install_btn': 'Install & Restart',
         'update.later_btn': 'Later',
 
@@ -136,6 +139,7 @@ translations = {
         'menu.help': 'Hilfe',
         'menu.system_check': 'Systemcheck',
         'menu.about': '\u00dcber...',
+        'menu.check_updates': 'Nach Updates suchen...',
 
         # System Check
         'syscheck.title': 'Systemstatus',
@@ -150,6 +154,7 @@ translations = {
         'syscheck.loopback_desc': 'Kein Loopback-Ger\u00e4t gefunden - VB-Audio Virtual Cable installieren (kostenlos): vb-audio.com/Cable',
         'syscheck.gpu': 'GPU-Beschleunigung (CUDA)',
         'syscheck.gpu_desc': 'Keine NVIDIA-GPU gefunden - CPU wird verwendet (langsamer)',
+        'syscheck.gpu_exe_desc': 'In der .exe nicht verf\u00fcgbar - f\u00fcr GPU-Support aus dem Quellcode starten',
 
         # GPU Installation
         'menu.install_gpu': 'GPU-Support installieren...',
@@ -238,6 +243,7 @@ translations = {
         'update.downloading': 'Update wird heruntergeladen...',
         'update.ready': 'Version {version} ist bereit zur Installation!\n\nJetzt installieren und neustarten?',
         'update.failed': 'Update-Pr\u00fcfung fehlgeschlagen.',
+        'update.up_to_date': 'Du verwendest die neueste Version (v{version}).',
         'update.install_btn': 'Installieren & Neustarten',
         'update.later_btn': 'Sp\u00e4ter',
 

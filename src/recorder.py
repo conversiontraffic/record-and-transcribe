@@ -248,6 +248,7 @@ class RecordAndTranscribeApp:
         help_menu.add_command(label=t('menu.system_check'), command=self._show_system_check)
         help_menu.add_command(label=t('menu.install_gpu'), command=self._install_gpu_support)
         help_menu.add_separator()
+        help_menu.add_command(label=t('menu.check_updates'), command=self._manual_update_check)
         help_menu.add_command(label=t('menu.about'), command=self._show_about)
 
     def _check_cuda_available(self):
@@ -283,11 +284,12 @@ class RecordAndTranscribeApp:
 
         # GPU/CUDA
         cuda_ok, gpu_name = self._check_cuda_available()
-        cuda_desc = t('syscheck.gpu_desc')
         if cuda_ok and gpu_name:
             checks.append((f'{t("syscheck.gpu")} ({gpu_name})', True, ''))
+        elif hasattr(sys, '_MEIPASS'):
+            checks.append((t('syscheck.gpu'), False, t('syscheck.gpu_exe_desc')))
         else:
-            checks.append((t('syscheck.gpu'), False, cuda_desc))
+            checks.append((t('syscheck.gpu'), False, t('syscheck.gpu_desc')))
 
         # Build message
         lines = [t('syscheck.title'), '']
@@ -374,7 +376,7 @@ class RecordAndTranscribeApp:
         ]
         messagebox.showinfo(t('menu.about'), '\n'.join(lines))
 
-    def _check_for_updates(self):
+    def _check_for_updates(self, manual=False):
         """Check for updates in background thread."""
         def on_result(version, url, filename):
             if version and url and filename:
@@ -389,8 +391,17 @@ class RecordAndTranscribeApp:
                         0, lambda: self.status_var.set(t('status.ready'))
                     )
                 )
+            elif manual:
+                self.root.after(0, lambda: messagebox.showinfo(
+                    t('update.title'),
+                    t('update.up_to_date', version=APP_VERSION)
+                ))
 
         check_for_updates(APP_VERSION, on_result)
+
+    def _manual_update_check(self):
+        """Manually trigger update check from menu."""
+        self._check_for_updates(manual=True)
 
     def _show_update_dialog(self, version, installer_path):
         """Show dialog offering to install downloaded update."""
