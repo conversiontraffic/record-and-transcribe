@@ -31,9 +31,22 @@ def get_resource_path(relative_path):
 
 
 def get_config_dir():
-    """Get config directory next to executable (portable) or in source tree."""
+    """Get config directory. Uses AppData when installed in Program Files, otherwise next to exe."""
     if hasattr(sys, '_MEIPASS'):
-        return Path(sys.executable).parent
+        exe_dir = Path(sys.executable).parent
+        # If installed in a protected directory, use AppData for config
+        protected_prefixes = [
+            os.environ.get('ProgramFiles', ''),
+            os.environ.get('ProgramFiles(x86)', ''),
+            os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Programs'),
+        ]
+        exe_str = str(exe_dir).lower()
+        for prefix in protected_prefixes:
+            if prefix and exe_str.startswith(prefix.lower()):
+                appdata_dir = Path(os.environ.get('APPDATA', str(Path.home()))) / 'Record & Transcribe'
+                appdata_dir.mkdir(parents=True, exist_ok=True)
+                return appdata_dir
+        return exe_dir
     return Path(__file__).parent.parent
 
 
